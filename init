@@ -1,0 +1,12 @@
+#! /usr/bin/env bash
+
+echo "Ingresa Password:"
+
+(cd dataBase
+
+docker-compose up -d)
+
+wait 
+
+./server
+

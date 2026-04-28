@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizador de Planes de Estudio</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Mobile Header */
+        .mobile-header {
+            display: none;
+            background: var(--card-bg);
+            padding: 0.75rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .mobile-header h1 {
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        #menu-toggle {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        /* Menú Lateral */
+        aside {
+            width: 280px;
+            background: var(--card-bg);
+            border-right: 1px solid var(--border);
+            padding: 2rem 1.5rem;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.02);
+            flex-shrink: 0;
+            transition: transform 0.3s ease;
+        }
+
+        h1 { font-size: 1.25rem; margin-bottom: 2rem; color: var(--primary); font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+        h2 { font-size: 1.1rem; margin-top: 0; margin-bottom: 1.5rem; color: var(--text); font-weight: 600; }
+
+        #carreras {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #carreras li {
+            padding: 0.85rem 1rem;
+            margin-bottom: 0.6rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: transparent;
+            border: 1px solid transparent;
+            font-size: 0.95rem;
+            color: var(--text-light);
+        }
+
+        #carreras li:hover {
+            background: #eff6ff;
+            color: var(--primary);
+            border-color: #dbeafe;
+            transform: translateX(4px);
+        }
+
+        /* Área Principal */
+        main {
+            flex: 1;
+            padding: 2rem;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Tabla de Plan */
+        #plan {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        #plan:has(table) {
+            display: block;
+        }
+
+        table {
+            border-collapse: separate;
+            border-spacing: 0.75rem;
+            width: 100%;
+        }
+
+        th {
+            color: var(--text-light);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            letter-spacing: 0.1em;
+            padding: 0.5rem;
+            text-align: center;
+        }
+
+        td {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 1.25rem 1rem;
+            border-radius: 0.85rem;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.85rem;
+            min-width: 160px;
+            text-align: center;
+            line-height: 1.4;
+            font-weight: 500;
+        }
+
+        td:not(:empty):hover {
+            border-color: var(--primary);
+            background: #ffffff;
+            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.1);
+            transform: translateY(-3px);
+            color: var(--primary);
+        }
+
+        /* Panel de Detalle */
+        #detalle {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: var(--shadow);
+            border-left: 5px solid var(--primary);
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+        }
+
+        #detalle.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .materia-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .materia-info p { margin: 0; }
+        .materia-info b { 
+            display: block; 
+            color: var(--text-light); 
+            font-size: 0.7rem; 
+            text-transform: uppercase; 
+            margin-bottom: 0.25rem; 
+            letter-spacing: 0.05em;
+        }
+        .materia-val { 
+            font-size: 1rem; 
+            font-weight: 600; 
+            color: var(--text);
+        }
+
+        .placeholder {
+            color: var(--text-light);
+            font-style: italic;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            aside {
+                position: fixed;
+                top: 55px;
+                left: 0;
+                width: 100%;
+                height: calc(100vh - 55px);
+                z-index: 999;
+                transform: translateX(-100%);
+                border-right: none;
+                padding: 1.5rem;
+                box-sizing: border-box;
+            }
+
+            aside.open {
+                transform: translateX(0);
+            }
+
+            aside h1 {
+                display: none;
+            }
+
+            main {
+                padding: 1.25rem;
+            }
+
+            #plan {
+                padding: 0.75rem;
+                border-radius: 0.75rem;
+                margin-left: -0.25rem;
+                margin-right: -0.25rem;
+            }
+
+            table {
+                border-spacing: 0.5rem;
+            }
+
+            td {
+                min-width: 140px;
+                padding: 1rem 0.75rem;
+                font-size: 0.8rem;
+            }
+
+            .materia-info {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <header class="mobile-header">
+        <h1>Académico</h1>
+        <button id="menu-toggle">☰ Carreras</button>
+    </header>
+
+    <aside id="sidebar">
+        <h1>Académico</h1>
+        <h2>Carreras</h2>
+        <ul id="carreras"></ul>
+    </aside>
+
+    <main>
+        <div class="container">
+            <h2>Estructura Curricular</h2>
+            <div id="plan">
+                <span class="placeholder">Selecciona una carrera para visualizar el mapa curricular.</span>
+            </div>
+
+            <h2 style="margin-top: 1rem;">Detalles de la Asignatura</h2>
+            <div id="detalle">
+                <span class="placeholder">Haz clic en una materia del plan para ver su información detallada.</span>
+            </div>
+        </div>
+    </main>
+
+<script>
+const API = "http://localhost:8080";
+
+// Mobile Menu Toggle
+const menuToggle = document.getElementById('menu-toggle');
+const sidebar = document.getElementById('sidebar');
+
+menuToggle.onclick = () => {
+    sidebar.classList.toggle('open');
+    menuToggle.textContent = sidebar.classList.contains('open') ? '✕ Cerrar' : '☰ Carreras';
+};
+
+// =========================
+// Cargar carreras
+// =========================
+fetch(API + "/carreras")
+.then(r => r.json())
+.then(data => {
+    const ul = document.getElementById("carreras");
+
+    data.forEach(c => {
+        const li = document.createElement("li");
+        li.textContent = c[1]; // nombre
+        li.onclick = () => {
+            // Estilo activo simple
+            document.querySelectorAll('#carreras li').forEach(el => {
+                el.style.background = 'transparent';
+                el.style.color = 'var(--text-light)';
+            });
+            li.style.background = '#eff6ff';
+            li.style.color = 'var(--primary)';
+            
+            cargarPlan(c[0]);
+
+            // Close sidebar on mobile after selection
+            if (window.innerWidth <= 768) {
+                sidebar.classList.remove('open');
+                menuToggle.textContent = '☰ Carreras';
+            }
+        };
+        ul.appendChild(li);
+    });
+});
+
+
+// =========================
+// Cargar plan
+// =========================
+function cargarPlan(carrera) {
+    fetch(API + "/planes/" + carrera)
+    .then(r => r.json())
+    .then(data => {
+
+        const planDiv = document.getElementById("plan");
+        planDiv.innerHTML = "";
+
+        // agrupar por semestre
+        const semestres = {};
+        data.forEach(m => {
+            if (!semestres[m[2]]) semestres[m[2]] = [];
+            semestres[m[2]].push(m);
+        });
+
+        const table = document.createElement("table");
+        const header = document.createElement("tr");
+
+        Object.keys(semestres).forEach(s => {
+            const th = document.createElement("th");
+            th.textContent = "Semestre " + s;
+            header.appendChild(th);
+        });
+
+        table.appendChild(header);
+
+        const maxRows = Math.max(...Object.values(semestres).map(x => x.length));
+
+        for (let i = 0; i < maxRows; i++) {
+            const tr = document.createElement("tr");
+
+            Object.keys(semestres).forEach(s => {
+                const td = document.createElement("td");
+
+                if (semestres[s][i]) {
+                    td.textContent = semestres[s][i][1];
+                    td.onclick = () => verMateria(semestres[s][i][0]);
+                }
+
+                tr.appendChild(td);
+            });
+
+            table.appendChild(tr);
+        }
+
+        planDiv.appendChild(table);
+    });
+}
+
+
+// =========================
+// Detalle materia
+// =========================
+function verMateria(clave) {
+    fetch(API + "/materias/" + clave)
+    .then(r => r.json())
+    .then(data => {
+
+        const div = document.getElementById("detalle");
+        div.classList.remove('active');
+        
+        // Pequeño timeout para reiniciar la animación
+        setTimeout(() => {
+            div.innerHTML = `
+                <div class="materia-info">
+                    <p><b>Clave de Materia</b> <span class="materia-val">${data.materia[0]}</span></p>
+                    <p><b>Nombre Asignatura</b> <span class="materia-val" style="color: var(--primary)">${data.materia[1]}</span></p>
+                    <p><b>Ubicación Semestral</b> <span class="materia-val">${data.materia[2]}° Semestre</span></p>
+                    <p><b>Requisitos Previos</b> <span class="materia-val">${data.requisitos.join(", ") || "Ninguno"}</span></p>
+                </div>
+            `;
+            div.classList.add('active');
+        }, 50);
+    });
+}
+</script>
+
+</body>
+</html>

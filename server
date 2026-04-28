@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+QUIET=false
+
+# Parse flags
+while getopts "q" opt; do
+  case $opt in
+    q) QUIET=true ;;
+  esac
+done
+
+# Redirección
+if $QUIET; then
+  OUT="/dev/null"
+else
+  OUT="/dev/stdout"
+fi
+
+
+cleanup() {
+  echo "Deteniendo procesos..."
+    fuser -k 3000/tcp
+    fuser -k 5500/tcp
+    fuser -k 8000/tcp
+    fuser -k 8080/tcp
+  echo "Todo detenido"
+}
+
+trap cleanup EXIT INT TERM
+
+echo "Iniciando servicios... (presiona 'q' + Enter para salir)"
+
+# API
+(
+  cd api
+  uvicorn admin:app --port 8000 >"$OUT" 2>&1 &
+
+  uvicorn main:app --host 0.0.0.0 --port 8080 >"$OUT" 2>&1 &
+)
+
+# Frontend admin
+(
+  cd frontend/admin
+  python -m http.server 5500 >"$OUT" 2>&1 &
+)
+
+# Frontend user
+(
+  cd frontend/user
+  npx serve . >"$OUT" 2>&1 &
+)
+
+
+wait -n
+cleanup

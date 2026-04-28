@@ -1,0 +1,6 @@
+#! /usr/bin/env bash
+
+fuser -k 3000/tcp
+fuser -k 5500/tcp
+fuser -k 8000/tcp
+fuser -k 8080/tcp

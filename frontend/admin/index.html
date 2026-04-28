@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión Académica - Admin</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --bg: #f1f5f9;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar simple */
+        aside {
+            width: 260px;
+            background: #1e293b;
+            color: white;
+            padding: 2rem 1.5rem;
+            flex-shrink: 0;
+        }
+
+        aside h1 { 
+            font-size: 1.1rem; 
+            margin-bottom: 2.5rem; 
+            color: #38bdf8; 
+            font-weight: 800; 
+            text-transform: uppercase; 
+            letter-spacing: 1px;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.5rem;
+            background: rgba(255,255,255,0.05);
+            font-size: 0.9rem;
+            cursor: default;
+        }
+
+        /* Área Principal */
+        main {
+            flex: 1;
+            padding: 2.5rem;
+            overflow-y: auto;
+        }
+
+        .header-main {
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+        }
+
+        .header-main h2 { margin: 0; font-size: 1.5rem; color: var(--text); }
+        .header-main p { margin: 0.5rem 0 0; color: var(--text-light); font-size: 0.9rem; }
+
+        /* Grid de Secciones */
+        .admin-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 1.75rem;
+            border-radius: 1rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card h3::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 18px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+
+        /* Formularios */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.025em;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border);
+            background-color: #f8fafc;
+            color: var(--text);
+            font-size: 0.9rem;
+            box-sizing: border-box;
+            transition: all 0.2s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        select[multiple] {
+            height: 120px;
+            padding: 0.5rem;
+        }
+
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: none;
+            background-color: var(--primary);
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .btn-danger {
+            background-color: #fee2e2;
+            color: var(--danger);
+            border: 1px solid #fecaca;
+        }
+
+        .btn-danger:hover {
+            background-color: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+
+        .delete-group {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .delete-group input { flex: 1; }
+        .delete-group button { width: auto; white-space: nowrap; padding-left: 1.5rem; padding-right: 1.5rem; }
+
+        hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+
+    </style>
+</head>
+<body>
+
+    <!-- <aside> -->
+    <!--     <h1>Panel Admin</h1> -->
+    <!--     <div class="nav-item">Dashboard General</div> -->
+    <!--     <div class="nav-item">Gestión Académica</div> -->
+    <!--     <div class="nav-item">Configuración</div> -->
+    <!-- </aside> -->
+
+    <main>
+        <div class="header-main">
+            <h2>Gestión de Oferta Académica</h2>
+            <p>Configura materias, planes de estudio y carreras del sistema.</p>
+        </div>
+
+        <div class="admin-grid">
+            
+            <!-- Crear Materia -->
+            <div class="card">
+                <h3>Nueva Materia</h3>
+                <div class="form-group">
+                    <label>Clave</label>
+                    <input id="m_clave" placeholder="Ej: MAT101">
+                </div>
+                <div class="form-group">
+                    <label>Nombre</label>
+                    <input id="m_nombre" placeholder="Nombre de la materia">
+                </div>
+                <div class="form-group">
+                    <label>Semestre Sugerido</label>
+                    <input id="m_semestre" type="number" placeholder="1-10">
+                </div>
+                <div class="form-group">
+                    <label>Prerrequisitos (Selección múltiple)</label>
+                    <select id="m_prereqs" multiple></select>
+                </div>
+                <button onclick="crearMateria()">Registrar Materia</button>
+            </div>
+
+            <!-- Crear Plan -->
+            <div class="card">
+                <h3>Nuevo Plan de Estudio</h3>
+                <div class="form-group">
+                    <label>Clave del Plan</label>
+                    <input id="p_clave" placeholder="Ej: PLAN-2024">
+                </div>
+                <div class="form-group">
+                    <label>Materias Incluidas (Selección múltiple)</label>
+                    <select id="p_materias" multiple></select>
+                </div>
+                <button onclick="crearPlan()">Generar Plan de Estudios</button>
+            </div>
+
+            <!-- Crear Carrera -->
+            <div class="card">
+                <h3>Nueva Carrera</h3>
+                <div class="form-group">
+                    <label>Clave Carrera</label>
+                    <input id="c_clave" placeholder="Ej: ISC">
+                </div>
+                <div class="form-group">
+                    <label>Nombre Completo</label>
+                    <input id="c_nombre" placeholder="Ej: Ingeniería en Sistemas">
+                </div>
+                <div class="form-group">
+                    <label>Plan de Estudios Asignado</label>
+                    <select id="c_plan"></select>
+                </div>
+                <button onclick="crearCarrera()">Dar de Alta Carrera</button>
+            </div>
+
+            <!-- Acciones de Eliminación -->
+            <div class="card">
+                <h3>Eliminar (precaucion)</h3>
+                <p style="font-size: 0.8rem; color: var(--text-light); margin-bottom: 1.5rem;">Ingresa la clave del elemento que deseas remover del sistema.</p>
+                
+                <div class="form-group">
+                    <label>Eliminar Materia</label>
+                    <div class="delete-group">
+                        <input id="del_materia" placeholder="Clave materia">
+                        <button class="btn-danger" onclick="eliminarMateria()">Eliminar</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Eliminar Plan</label>
+                    <div class="delete-group">
+                        <input id="del_plan" placeholder="Clave plan">
+                        <button class="btn-danger" onclick="eliminarPlan()">Eliminar</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Eliminar Carrera</label>
+                    <div class="delete-group">
+                        <input id="del_carrera" placeholder="Clave carrera">
+                        <button class="btn-danger" onclick="eliminarCarrera()">Eliminar</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+<script>
+const API = "http://localhost:8000"
+
+// =========================
+// LOAD DATA
+// =========================
+
+async function loadMaterias() {
+    const res = await fetch(API + "/materias")
+    const data = await res.json()
+
+    const sel1 = document.getElementById("m_prereqs")
+    const sel2 = document.getElementById("p_materias")
+
+    data.forEach(m => {
+        let opt1 = new Option(m[1], m[0])
+        let opt2 = new Option(m[1], m[0])
+        sel1.add(opt1)
+        sel2.add(opt2)
+    })
+}
+
+async function loadPlanes() {
+    const res = await fetch(API + "/planes")
+    const data = await res.json()
+
+    const sel = document.getElementById("c_plan")
+
+    // Filtrar duplicados de planes en el selector
+    const planesUnicos = [...new Set(data.map(p => p[0]))];
+    planesUnicos.forEach(pClave => {
+        let opt = new Option(pClave, pClave)
+        sel.add(opt)
+    })
+}
+
+// =========================
+// CREAR MATERIA
+// =========================
+
+async function crearMateria() {
+    const clave = document.getElementById("m_clave").value
+    const nombre = document.getElementById("m_nombre").value
+    const semestre = parseInt(document.getElementById("m_semestre").value)
+
+    if(!clave || !nombre) return alert("Faltan datos");
+
+    await fetch(API + "/materias", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            clave,
+            nombre,
+            fecha_alta: new Date().toISOString().split('T')[0],
+            semestre
+        })
+    })
+
+    const prereqs = [...document.getElementById("m_prereqs").selectedOptions]
+
+    for (let p of prereqs) {
+        await fetch(API + "/prerequisitos", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+                materia_clave: clave,
+                requisito_clave: p.value
+            })
+        })
+    }
+
+    alert("Materia registrada con éxito");
+    location.reload();
+}
+
+// =========================
+// CREAR PLAN
+// =========================
+
+async function crearPlan() {
+    const clave = document.getElementById("p_clave").value
+    const materias = [...document.getElementById("p_materias").selectedOptions]
+
+    if(!clave || materias.length === 0) return alert("Faltan datos");
+
+    for (let m of materias) {
+        await fetch(API + "/planes", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+                clave,
+                materia_clave: m.value
+            })
+        })
+    }
+
+    alert("Plan de estudios creado");
+    location.reload();
+}
+
+// =========================
+// CREAR CARRERA
+// =========================
+
+async function crearCarrera() {
+    const clave = document.getElementById("c_clave").value
+    const nombre = document.getElementById("c_nombre").value
+    const plan = document.getElementById("c_plan").value
+
+    if(!clave || !nombre || !plan) return alert("Faltan datos");
+
+    await fetch(API + "/carreras", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            clave,
+            nombre,
+            fecha_alta: new Date().toISOString().split('T')[0],
+            plan_clave: plan
+        })
+    })
+
+    alert("Carrera dada de alta");
+    location.reload();
+}
+
+async function eliminarMateria() {
+    const clave = document.getElementById("del_materia").value
+    if(!confirm("¿Seguro que deseas eliminar la materia?")) return;
+
+    const res = await fetch(API + "/materias/" + clave, {
+        method: "DELETE"
+    })
+
+    const data = await res.json()
+    alert("Operación completada");
+    location.reload();
+}
+
+
+async function eliminarPlan() {
+    const clave = document.getElementById("del_plan").value
+    if(!confirm("¿Seguro que deseas eliminar el plan?")) return;
+
+    const res = await fetch(API + "/planes/" + clave, {
+        method: "DELETE"
+    })
+
+    const data = await res.json()
+    alert("Operación completada");
+    location.reload();
+}
+
+
+async function eliminarCarrera() {
+    const clave = document.getElementById("del_carrera").value
+    if(!confirm("¿Seguro que deseas eliminar la carrera?")) return;
+
+    const res = await fetch(API + "/carreras/" + clave, {
+        method: "DELETE"
+    })
+
+    const data = await res.json()
+    alert("Operación completada");
+    location.reload();
+}
+
+// init
+loadMaterias()
+loadPlanes()
+</script>
+
+</body>
+</html>
