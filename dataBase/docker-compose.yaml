@@ -3,9 +3,9 @@ services:
     image: postgres:16-alpine # Uses a lightweight version of Postgres 16
     restart: always
     environment:
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mysecretpassword
-      POSTGRES_DB: mydatabase
+      POSTGRES_USER: ING_SOFT_II
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: MGCI 
     ports:
       - "5432:5432" # Maps host port 5432 to container port 5432
     volumes:

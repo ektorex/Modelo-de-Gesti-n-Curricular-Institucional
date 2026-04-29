@@ -19,17 +19,6 @@ else
 fi
 
 
-cleanup() {
-  echo "Deteniendo procesos..."
-    fuser -k 3000/tcp
-    fuser -k 5500/tcp
-    fuser -k 8000/tcp
-    fuser -k 8080/tcp
-  echo "Todo detenido"
-}
-
-trap cleanup EXIT INT TERM
-
 echo "Iniciando servicios... (presiona 'q' + Enter para salir)"
 
 # API
@@ -49,9 +38,12 @@ echo "Iniciando servicios... (presiona 'q' + Enter para salir)"
 # Frontend user
 (
   cd frontend/user
+
+  ADDR=$(hostname -i | awk '{print $1}')
+
+  sed -i "305c\\const API = \"http://$ADDR:8080\";" index.html
+
+  python -m http.server 5050 >"$OUT" 2>&1 &
   npx serve . >"$OUT" 2>&1 &
 )
 
-
-wait -n
-cleanup

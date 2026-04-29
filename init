@@ -1,12 +1,74 @@
 #! /usr/bin/env bash
 
-echo "Ingresa Password:"
+# Función para dibujar "ventana"
+draw_box() {
+    clear
+    echo "========================================"
+    echo "           REGISTRO DE USUARIO          "
+    echo "========================================"
+    echo ""
+}
 
-(cd dataBase
+# Capturar usuario
+draw_box
+printf "Usuario: "
+read USER
 
-docker-compose up -d)
+# Capturar contraseña (oculta)
+while true; do
+    draw_box
+    printf "Usuario: %s\n\n" "$USER"
 
-wait 
+    printf "Contraseña: "
+    read -s PASS1
+    echo
 
-./server
+    printf "Repetir contraseña: "
+    read -s PASS2
+    echo
+
+    if [ "$PASS1" != "$PASS2" ]; then
+        echo ""
+        echo "❌ Las contraseñas no coinciden. Presiona Enter para intentar de nuevo..."
+        read
+    else
+        break
+    fi
+done
+
+# Guardar en variable
+CREDENTIALS="usuario=$USER;password=$PASS1"
+
+# Pantalla final
+draw_box
+echo "✅ Usuario registrado correctamente"
+echo ""
+echo "Presiona Enter para continuar..."
+read
+
+echo "Creando la Base de datos"
+
+(
+  cd dataBase
+
+    sed -i "6c\      POSTGRES_USER: $USER" docker-compose.yaml 
+    sed -i "7c\      POSTGRES_PASSWORD: $PASS1" docker-compose.yaml 
+
+    docker-compose up -d
+)
+
+(
+  cd api 
+
+    sed -i "8c\        user=\"$USER\"," db.py 
+    sed -i "9c\        password=\"$PASS1\"," db.py 
+  )
+
+wait
+
+echo "Creando los paneles"
+
+./server -q
+
+echo Listo
 
