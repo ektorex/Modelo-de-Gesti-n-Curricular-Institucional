@@ -23,8 +23,8 @@ Este proyecto implementa un sistema para la gestión de planes de estudio, carre
 1. Clonar el repositorio:
 
    ```bash
-   git clone <https://github.com/ektorex/Modelo-de-Gesti-n-Curricular-Institucional.git>
-   cd <Modelo-de-Gesti-n-Curricular-Institucional>
+   git clone https://github.com/ektorex/Modelo-de-Gesti-n-Curricular-Institucional.git
+   cd Modelo-de-Gesti-n-Curricular-Institucional
    chmod +x init server killer
    ```
 
